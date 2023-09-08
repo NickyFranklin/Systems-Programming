@@ -1,0 +1,14 @@
+#include <stdlib.h>
+#include <string.h>
+#include <stdio.h>
+
+int main() {
+  char *a;
+  
+  while(1) {
+    a = malloc(1);
+  }
+  
+  return 0;
+}
+

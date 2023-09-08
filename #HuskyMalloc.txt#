@@ -1,0 +1,2 @@
+Nodes are 32 bits + 32 bits + The pointer to the next load for linked list
+

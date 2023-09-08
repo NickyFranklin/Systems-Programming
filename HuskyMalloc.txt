@@ -1,0 +1,42 @@
+Nodes are 32 bits + 32 bits + The pointer to the next load for linked list
+
+9/7
+Libraries use an archiver that make it easier to link
+Object files contain defined and undefined global variables and functions
+Linkers combine the object files and gives meaning to the symbols while creating the executables
+There are symbol tables in obejct files
+	The symbol table defines variables
+Object modules are usually stored in ELF
+Object Files are made up of:
+HEader section: Sizes to parse object module and create the program
+machine code
+initialized data: Data that doesn't go on the stack (static and global)
+symbol table: Defines symbols
+relocation information: Records places where symbols are so that they can be placed where they need to go
+
+File
+nm
+etc
+
+Create load module and symbol table
+Get next module
+
+Object Module
+	Insert code and data
+		Relocate object module
+		Undefined external references
+		Defined external references
+	Library
+		Find each undefined ref in table
+		see if symbol defined
+		if so, load
+	step 2
+Static linking:
+Fast, large executable, updates have to be recompiled
+
+Dynamic Linking:
+Slow, Small executable, no need to recompile as code is loaded independently
+
+
+
+	
