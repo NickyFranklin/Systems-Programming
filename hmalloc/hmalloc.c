@@ -43,14 +43,12 @@ void traverse(){
 void *hmalloc(int bytes_to_allocate){
   void *pb = sbrk(bytes_to_allocate + 8);
   uint32_t length = bytes_to_allocate;
-  uint32_t* Next = NULL;
-  uint8_t* pc = (uint8_t *) pb;
-  pc += bytes_to_allocate;
-  uint32_t* pd = (uint32_t*) pc;
-  *pd = length; 
-  pd++;
-  pd = Next;
-  return pb; //placeholder to be replaced by proper return value
+  uint32_t next = 0;
+  *((uint32_t *) pb) = length;
+  *((uint32_t *) (pb + 4)) = next;
+  pb = ((uint32_t *) (pb + 8));
+  pb = (void *) pb;
+  return pb;
 }
 
 /* hcalloc

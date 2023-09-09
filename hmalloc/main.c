@@ -15,6 +15,8 @@ int main(int argc, char *argv[]){
   a = hmalloc(10);
   *a = 5;
   printf("%d\n", *a);
+  
+  printf("area [0-4] = %d, region in hex = %p\n", *((char*) (a-8)), ((char*) (a-8)));
   // some calls to hfree
   
   return 1;
