@@ -18,13 +18,24 @@ struct Node {
  * area in the free pool. Each entry should be printed on a new line.
  */
 void traverse(){
-   /* Printing format:
-	 * "Index: %d, Address: %08x, Length: %d\n"
-	 *    -Index is the position in the free list for the current entry. 
-	 *     0 for the head and so on
-	 *    -Address is the pointer to the beginning of the area.
-	 *    -Length is the length in bytes of the free area.
-	 */
+  /* Printing format:
+   * "Index: %d, Address: %08x, Length: %d\n"
+   *    -Index is the position in the free list for the current entry. 
+   *     0 for the head and so on
+   *    -Address is the pointer to the beginning of the area.
+   *    -Length is the length in bytes of the free area.
+   */
+  void* temp = free_list;
+  temp = ((char*) (temp - 4));
+  int i = 0;
+  while(*((char*) (temp)) != 0) {
+    printf("Index: %d, Address: %08x, Length: %d\n", i, ((char*) temp - 4),
+	   *((char*) temp - 4));
+    i++;
+    temp = (((char*) temp) - *((char*) (temp)));
+  }
+  printf("Index: %d, Address: %08x, Length: %d\n", i, ((char*) temp - 4),
+	   *((char*) temp - 4));
 }
 
 /* hmalloc
@@ -41,6 +52,37 @@ void traverse(){
  *     to the user.
  */
 void *hmalloc(int bytes_to_allocate){
+  if(free_list == NULL) {
+    void *pb = sbrk(bytes_to_allocate + 8);
+    uint32_t length = bytes_to_allocate;
+    uint32_t next = 0;
+    *((uint32_t *) pb) = length;
+    *((uint32_t *) (pb + 4)) = next;
+    pb = ((uint32_t *) (pb + 8));
+    pb = (void *) pb;
+    return pb;
+  }
+
+  void* temp = free_list;
+  temp = ((char*) (temp - 4));
+  int extra = 0;
+  void* previous = NULL;
+  int i = 0;
+  while(*((char*) (temp)) != 0 || extra != 1) {
+    if(*((char*) (temp)) == 0) {
+      extra = 1;
+    }
+    int size = *((char*) (temp - 4));
+    if(bytes_to_allocate < size) {
+      if(previous != NULL) {
+	*((char*) previous) = *((char *) temp) + *((char *) previous);
+      }
+      return ((char *) (temp + 4));
+    }
+    previous = temp;
+    temp = (((char*) temp) - *((char*) (temp)));
+  }
+
   void *pb = sbrk(bytes_to_allocate + 8);
   uint32_t length = bytes_to_allocate;
   uint32_t next = 0;
@@ -67,7 +109,12 @@ void *hcalloc(int bytes_to_allocate){
  *     free list.
  */
 void hfree(void *ptr){
-	
+  void* freelistTemp = free_list;
+  free_list = ptr;
+  uint32_t length = ((char*) free_list) - ((char*) freelistTemp);
+  if(freelistTemp != NULL) {
+    *((uint32_t *) (free_list - 4)) = length;
+  }
 }
 
 /* For the bonus credit implement hrealloc. You will need to add a prototype
