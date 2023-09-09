@@ -25,17 +25,22 @@ void traverse(){
    *    -Address is the pointer to the beginning of the area.
    *    -Length is the length in bytes of the free area.
    */
-  void* temp = free_list;
-  temp = ((char*) (temp - 4));
-  int i = 0;
-  while(*((char*) (temp)) != 0) {
+  if(free_list != NULL) {
+    void* temp = free_list;
+    temp = ((char*) (temp - 4));
+    int i = 0;
+    while(*((char*) (temp)) != 0) {
+      printf("Index: %d, Address: %08x, Length: %d\n", i, ((char*) temp - 4),
+	     *((char*) temp - 4));
+      i++;
+      temp = (((char*) temp) - *((char*) (temp)));
+    }
     printf("Index: %d, Address: %08x, Length: %d\n", i, ((char*) temp - 4),
 	   *((char*) temp - 4));
-    i++;
-    temp = (((char*) temp) - *((char*) (temp)));
   }
-  printf("Index: %d, Address: %08x, Length: %d\n", i, ((char*) temp - 4),
-	   *((char*) temp - 4));
+  else {
+    printf("NULL\n");
+  }
 }
 
 /* hmalloc
@@ -67,16 +72,36 @@ void *hmalloc(int bytes_to_allocate){
   temp = ((char*) (temp - 4));
   int extra = 0;
   void* previous = NULL;
-  int i = 0;
   while(*((char*) (temp)) != 0 || extra != 1) {
     if(*((char*) (temp)) == 0) {
       extra = 1;
     }
     int size = *((char*) (temp - 4));
-    if(bytes_to_allocate < size) {
+    if(bytes_to_allocate <= size) {
+      //delete if middle
       if(previous != NULL) {
 	*((char*) previous) = *((char *) temp) + *((char *) previous);
+	if(*((char *) temp) == 0) {
+	  free_list = previous;
+	  *((char *) (free_list)) = 0;
+	}
+	else {
+	  free_list = previous;
+	}
+	free_list = ((char*) (free_list + 4));
       }
+
+      //delete if first
+      if(previous == NULL) {
+	free_list = (((char*) temp) - *((char*) (temp)));
+	if(*((char*) free_list) == 0) {
+	  free_list = NULL;
+	}
+	else {
+	  free_list = ((char*) (free_list + 4));
+	}
+      }
+      
       return ((char *) (temp + 4));
     }
     previous = temp;
@@ -98,8 +123,11 @@ void *hmalloc(int bytes_to_allocate){
  * area by setting all bytes to 0.
  */
 void *hcalloc(int bytes_to_allocate){
-	
-   return NULL; //placeholder to be replaced by proper return value
+  void* pb = hmalloc(bytes_to_allocate);
+  for(int i = 0; i < bytes_to_allocate; i++) {
+    *((char*) (pb + i)) = 0;
+  }
+  return pb; //placeholder to be replaced by proper return value
 }
 
 /* hfree

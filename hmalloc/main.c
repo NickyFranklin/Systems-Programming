@@ -38,25 +38,44 @@ int main(int argc, char *argv[]){
   printf("area [4-7] = %d, region in hex = %p\n", *((char*) (d) - 4), ((char*) (d-1)));
   // some calls to hfree
   hfree(a);
+  traverse();
   hfree(b);
+  traverse();
   hfree(c);
+  traverse();
   hfree(d);
   printf("Length between pointers: %d\n", *((char *) (a) - 4));
   printf("Length between pointers: %d\n", *((char *) (b) - 4));
   printf("Length between pointers: %d\n", *((char *) (c) - 4));
   printf("Length between pointers: %d\n", *((char *) (d) - 4));
   traverse();
-  a = hmalloc(10);
-  *a = 240;
+  char* e = hmalloc(10);
+  *e = 240;
   traverse();
-  b = hmalloc(sizeof(char));
-  *b = 23;
+  char* f = hmalloc(sizeof(char));
+  *f = 23;
   traverse();
-  c = hmalloc(sizeof(int));
-  *c = 69;
+  int* g = hcalloc(sizeof(int));
+  printf("%d\n", *g);
+  *g = 69;
   traverse();
-  d = hmalloc(55);
-  *d = 5555;
+  /*
+  int* h = hmalloc(55);
+  *h = 5555;
+  traverse();
+  
+  char* i = hcalloc(9);
+  *i = 1;
+  //free(e);
+  traverse();
+  */
+  char* j = hcalloc(1);
+  *j = 12;
+  //free(f);
+  traverse();
+  //free(g);
+  traverse();
+  //free(h);
   traverse();
   
   return 1;
