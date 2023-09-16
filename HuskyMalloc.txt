@@ -37,6 +37,32 @@ Fast, large executable, updates have to be recompiled
 Dynamic Linking:
 Slow, Small executable, no need to recompile as code is loaded independently
 
+File Systems:
+UNIX: Ordinary, Directory, Special, Symbolic Link, FIFO, Socket
+Directories contain information on the files within
+Maps symbolic file name into a file descriptor
+writing a directory is done under strict system control
+All directories start from / in linux
+It is the root directory and is where the OS looks for files
+Absolute vs Relative paths
+You can hardcode a path or use .. and / to try to find files
+Special Files:
+Drivers, R/W IO, Makes physical devices seem to be apart of the file system
+Linux boots into / directory
+FIFO: First in, First out
+FIFO is a type of pipe
+The | in linux is an un named pipe
+mkfifo [name]
+Unix sys has 12 bits to specify protection
+The bits are specified by the creator of the file
+R is read, W is write, X is execute
+(for ordinary files ^)
+Sticky bits are no longer used for files
+On directories, it allow all users to create files but only owners to delete
+Each ISA provides instructions to call a function within a program
+Function call instruction will jump to the functions starting point and the function will then return to where it was
+Kernel can not use this instruction to get protected resources
+We need to change security level as well by going to kernel mode
+Open Kernal Call
 
 
-	
