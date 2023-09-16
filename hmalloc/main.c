@@ -9,7 +9,8 @@ int main(int argc, char *argv[]){
   char *b;
   int *c;
   int *d;
-  a = hmalloc(10);
+  traverse();
+  a = hmalloc(1);
   b = hmalloc(sizeof(char));
   c = hmalloc(sizeof(int));
   d = hmalloc(55);
@@ -39,44 +40,17 @@ int main(int argc, char *argv[]){
   // some calls to hfree
   hfree(a);
   traverse();
-  hfree(b);
+  hfree(d);
   traverse();
   hfree(c);
   traverse();
-  hfree(d);
+  hfree(b);
   printf("Length between pointers: %d\n", *((char *) (a) - 4));
   printf("Length between pointers: %d\n", *((char *) (b) - 4));
   printf("Length between pointers: %d\n", *((char *) (c) - 4));
   printf("Length between pointers: %d\n", *((char *) (d) - 4));
   traverse();
-  char* e = hmalloc(10);
-  *e = 240;
+  char* e = hmalloc(2);
   traverse();
-  char* f = hmalloc(sizeof(char));
-  *f = 23;
-  traverse();
-  int* g = hcalloc(sizeof(int));
-  printf("%d\n", *g);
-  *g = 69;
-  traverse();
-  /*
-  int* h = hmalloc(55);
-  *h = 5555;
-  traverse();
-  
-  char* i = hcalloc(9);
-  *i = 1;
-  //free(e);
-  traverse();
-  */
-  char* j = hcalloc(1);
-  *j = 12;
-  //free(f);
-  traverse();
-  //free(g);
-  traverse();
-  //free(h);
-  traverse();
-  
   return 1;
 }

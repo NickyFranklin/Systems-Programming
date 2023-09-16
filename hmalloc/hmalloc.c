@@ -7,12 +7,6 @@
 /*Add additional data structures and globals here as needed.*/
 void *free_list = NULL;
 
-struct Node {
-  uint32_t length;
-  uint32_t* Next;
-  int bytes_to_allocate;
-};
-
 /* traverse
  * Start at the free list head, visit and print the length of each
  * area in the free pool. Each entry should be printed on a new line.
@@ -26,6 +20,7 @@ void traverse(){
    *    -Length is the length in bytes of the free area.
    */
   if(free_list != NULL) {
+    //this traverses the list until its done
     void* temp = free_list;
     temp = ((char*) (temp - 4));
     int i = 0;
@@ -57,6 +52,13 @@ void traverse(){
  *     to the user.
  */
 void *hmalloc(int bytes_to_allocate){
+  //If the free list is empty, don't bother looking and just allocate memory
+  //If the bytes to allocate are less than zero, return a pointer with nothing in it
+  if(bytes_to_allocate < 0) {
+    printf("Please enter in a positive integer\n");
+    void *pb;
+    return pb;
+  }
   if(free_list == NULL) {
     void *pb = sbrk(bytes_to_allocate + 8);
     uint32_t length = bytes_to_allocate;
@@ -68,6 +70,7 @@ void *hmalloc(int bytes_to_allocate){
     return pb;
   }
 
+  //If the free list isn't null, look through the list
   void* temp = free_list;
   temp = ((char*) (temp - 4));
   int extra = 0;
@@ -77,6 +80,7 @@ void *hmalloc(int bytes_to_allocate){
       extra = 1;
     }
     int size = *((char*) (temp - 4));
+    //If space is found, allocate it to that block
     if(bytes_to_allocate <= size) {
       //delete if middle
       if(previous != NULL) {
@@ -108,6 +112,7 @@ void *hmalloc(int bytes_to_allocate){
     temp = (((char*) temp) - *((char*) (temp)));
   }
 
+  //If no space is found, make a new memory block
   void *pb = sbrk(bytes_to_allocate + 8);
   uint32_t length = bytes_to_allocate;
   uint32_t next = 0;
@@ -124,6 +129,7 @@ void *hmalloc(int bytes_to_allocate){
  */
 void *hcalloc(int bytes_to_allocate){
   void* pb = hmalloc(bytes_to_allocate);
+  //Set every byte to 0
   for(int i = 0; i < bytes_to_allocate; i++) {
     *((char*) (pb + i)) = 0;
   }
