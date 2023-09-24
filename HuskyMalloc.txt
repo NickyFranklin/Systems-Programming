@@ -64,5 +64,29 @@ Function call instruction will jump to the functions starting point and the func
 Kernel can not use this instruction to get protected resources
 We need to change security level as well by going to kernel mode
 Open Kernal Call
+USer bits are always the strongest bits then the group and the other 
+It goes user, group, then other in the file system
+If file has suid set, then anything can use sudo
 
+Each ISA has instructions to call a function in a user program
+Kernel has user mode and kernel mode
+Certain processes can only be invoked in kernel mode (sys calls)
+
+Open(): opens file descriptor: we have to tell it the file we want to open and what 
+open() is a unix kernel call
+fopen() is a stdio library function. It is more commonly used than system calls
+open() returns an int
+fopen() returns a FILE* (stdio stream)
+read() write() lseek() operate on file descriptors
+
+File descriptors:
+0 = stdin
+1 = stdout
+2 = stderr
+You can use these without problem
+custom file descriptors start at 3
+read(): takes file descriptor, void* buffer, size_t count
+Make sure buffer is big enough
+write() has the same args
+lseek(file descriptor, off_t offset, whence)
 

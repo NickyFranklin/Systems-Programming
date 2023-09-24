@@ -1,0 +1,13 @@
+1. Make a program called copy.c that takes in 3 arguments: infile outfile blocksize
+Make error messages for not having enough arguments
+If the blocksize argument is skipped, assume a size of 1024
+If a block size is not a multiple of 4, print to stderror and round up to nearest 4 bytes
+
+2. open a file using the open system call and write the contents to an array, verify that the values are correct
+The array will be unsigned ints
+
+3. Open another file and write the contents of the array to the file, verify that the values are correct
+
+4. Take four bytes of the array and Xor it with that same block summed togethe
+
+5. Edit the program so that the files are being read and written to one block at a time
