@@ -60,7 +60,7 @@ int main(int argc, char *argv[]) {
     return 0;
   }
   
-  int outfileFD = open(outfile, O_RDWR | O_TRUNC);
+  int outfileFD = open(outfile, O_RDWR | O_TRUNC | O_CREAT | S_IRWXU);
   if(outfileFD < 0) {
     write(2, "Failed to open outfile\n", strlen("Failed to open outfile\n"));
     return 0;
@@ -104,7 +104,7 @@ int main(int argc, char *argv[]) {
     write(1, " ", sizeof(" "));
     sum = 0;
   }
-  
+  write(1, "\n", sizeof("\n"));
 
   
   close(infileFD);

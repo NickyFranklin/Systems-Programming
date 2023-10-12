@@ -90,3 +90,5 @@ Make sure buffer is big enough
 write() has the same args
 lseek(file descriptor, off_t offset, whence)
 
+Project 3: Compress and Decompress Files
+
