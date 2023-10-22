@@ -11,8 +11,8 @@ typedef struct {
   unsigned char byteSet;
 } Byte;
 
-Byte byte = {.byteSet = 0};
-
+Byte readByte = {.byteSet = 0};
+Byte writeByte = {.byteSet = 0, .location = 0, .byte = 0};
 /* read_byte
  * Abstraction to read a byte.
  * Relys on readBit.
@@ -34,8 +34,11 @@ unsigned short read_byte(){
   for(int i = 0; i < 8; i++) {
     readBit = read_bit();
     //If the bit we read in is greater than 1, its eof
+    //Behavior can change to be either only the proper data followed by 1s, 0s, or return a greater
+    //value
     if(readBit > 1) {
       return 512;
+      //returnByte = returnByte << (7 - i);
     }
     
     //else treat as normal
@@ -67,38 +70,38 @@ unsigned short read_bit(){
 
   //If the byte is old/has not been set, then read in one byte
   short eof = 0;  
-  if(byte.byteSet == 0) {
+  if(readByte.byteSet == 0) {
     //If end of file reached, return a number higher than a char can
-    byte.byteSet = 1;
-    eof = read(0, &(byte.byte), 1);
+    readByte.byteSet = 1;
+    eof = read(0, &(readByte.byte), 1);
     
     if(!eof) {
-      byte.byteSet = 0;
+      readByte.byteSet = 0;
       return 512;
     }
 
     //Set the location to be at the beginning bit
-    byte.location = 8;
+    readByte.location = 8;
     //Set each bit in the array
     int j = 1;
     for(int i = 0; i < 8; i++) {
-      byte.bit[i] = ((byte.byte) & j) >> i;
+      readByte.bit[i] = ((readByte.byte) & j) >> i;
       j = j << 1;
     }
   }
   
   //if the byte has already been set, set location forward
-  if(byte.byteSet == 1) {
-    byte.location--;
+  if(readByte.byteSet == 1) {
+    readByte.location--;
   }
 
   //If at the end of the array, put set array to 0
-  if(byte.location == 0) {
-    byte.byteSet = 0;
+  if(readByte.location == 0) {
+    readByte.byteSet = 0;
   }
   
   //Return the current bit
-  return byte.bit[byte.location];
+  return readByte.bit[readByte.location];
 }
 
 /* write_byte
@@ -107,6 +110,9 @@ unsigned short read_bit(){
 void write_byte(unsigned char byt){
   /* Use writeBit to write each bit of byt one at a time. Using writeBit
    * abstracts away byte boundaries in the output.*/
+  for(int i = 0; i < 8; i++) {
+    write_bit((byt >> (7 - i)) & 1);
+  }
   
   //Do NOT call write, instead utilize writeBit()
 }
@@ -119,9 +125,27 @@ void write_bit(unsigned char bit){
    * new bit into the buffer. Once 8 bits are buffered, write the full byte
    * to stdout (fd=1).
    */
+  //Write bits into their respective locations and increase the location int for where they are
+  writeByte.bit[writeByte.location] = bit;
+  writeByte.location++;
   
   //You will need to call write here eventually.
-  
+  //If the spaces for the bits have been filled, construct the byte and write it to stdout
+  if(writeByte.location == 8) {
+    //Set location back to 0 for the next time write bit is called
+    writeByte.location = 0;
+    //Write each part of the byte bit by bit
+    for(int i = 0; i < 8; i++) {
+      writeByte.byte |= writeByte.bit[i];
+      writeByte.byte = writeByte.byte << 1;
+    }
+    //Undo the final bit shift and write to stdout
+    writeByte.byte = writeByte.byte >> 1;
+    write(1, &(writeByte.byte), 1);
+
+    //Set the byte back to 0
+    writeByte.byte = 0;
+  }
 }
 
 /* flush_write_buffer
@@ -134,5 +158,9 @@ void flush_write_buffer(){
    * which should do the following: Determine if any buffered bits have yet to be 
    * written. Pad remaining bits in the byte with 1s. Write byte to stdout
    */
-  
+  if(writeByte.location > 0) {
+    for(int i = writeByte.location; i < 8; i++) {
+      write_bit(1);
+    }
+  }
 }

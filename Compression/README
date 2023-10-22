@@ -1,0 +1,7 @@
+Compressing czy: original file 17.0 kB
+Using czy: compressed file 10.5 kB: 38.24% reduction in size
+Using gzip: Compressed file 3.2 kB: 81.18% reduction in size
+
+Compressing czy.c: Original File 2.2 kB
+using czy: 2.1 kB: 4.55% reduction in size
+using gzip: 901 B: 59.05% reduction in size
