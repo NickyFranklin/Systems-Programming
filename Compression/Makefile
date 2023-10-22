@@ -8,4 +8,4 @@ dzy: bitsy dzy.c
 clean:
 	rm czy dzy bitsy.o
 submission:
-	gtar czvf prog3.tgz Makefile bitsy.h bitsy.c czy.c dzy.c README
+	zip prog3.zip Makefile bitsy.h bitsy.c czy.c dzy.c README
