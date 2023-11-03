@@ -4,15 +4,16 @@
 #include <string.h>
 
 int main() {
-  int read2 = 0;
-  char buf[1000];
-  write(1, "Testing stdout\n", sizeof("Testing stdout\n"));
-  write(2, "Testing stderr\n", sizeof("Testing stderr\n"));
-  read2 = read(0, buf, 1);
-  //buf[strlen(buf)+1] = "fdgdsgsdfg\0";
-  write(1, buf, strlen(buf));
-  sprintf(buf, "%d\n", read2);
-  write(1, buf, sizeof(buf));
+  char buf[1024];
+  for(int j = 0; j < 5; j++) {
+    for(int i = 0; i < 1000; i++) {
+      write(1, "a", 1);
+    }
+    write(1, "\n", 1);
+  }
+
+  read(0, buf, 1024); 
+  write(2, buf, 1024);
   
   return 0;
 }

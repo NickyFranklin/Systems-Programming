@@ -11,7 +11,7 @@ int main() {
   read2 = read(0, buf, 1);
   //buf[strlen(buf)+1] = "fdgdsgsdfg\0";
   write(1, buf, strlen(buf));
-  fprintf(buf, "%d\n", read2);
+  sprintf(buf, "%d\n", read2);
   write(1, buf, sizeof(buf));
   
   return 0;

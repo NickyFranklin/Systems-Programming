@@ -11,10 +11,12 @@
 int main(int argc, char** argv) {
   pid_t cpid, wpid;
   int error;
-  int nread = 0;
+  int nread, nread2, nread3 = nread2 = nread = 0;
   char buf[1000];
-  char bufRead[1024];
-  int fd0, fd1, fd2, fd0PtC[2], fd1CtP[2], fd2CtP[2];
+  char bufRead[1026];
+  char bufRead2[1026];
+  char bufRead3[1026];
+  int fd0, fd1, fd2, fd0CtP[2], fd0PtC[2], fd1CtP[2], fd2CtP[2];
   int status = 0;
   if(argc < 3) {
     strcpy(buf, "./hscript [program name] [arguments] [directory]\n");
@@ -22,7 +24,7 @@ int main(int argc, char** argv) {
     return 1;
   }
 
-  if(pipe(fd0PtC) < 0 || pipe(fd1CtP) < 0 || pipe(fd2CtP) < 0) {
+  if(pipe(fd0CtP) < 0 || pipe(fd0PtC) < 0 || pipe(fd1CtP) < 0 || pipe(fd2CtP) < 0) {
     strcpy(buf, "PIPING FAILED\n");
     write(2, buf, strlen(buf));
     return 1;
@@ -30,7 +32,8 @@ int main(int argc, char** argv) {
 
   if(fcntl(fd0PtC[0], F_SETFL, O_NONBLOCK) < 0 ||
      fcntl(fd1CtP[0], F_SETFL, O_NONBLOCK) < 0 ||
-     fcntl(fd2CtP[0], F_SETFL, O_NONBLOCK) < 0) {
+     fcntl(fd2CtP[0], F_SETFL, O_NONBLOCK) < 0 ||
+     fcntl(fd0CtP[0], F_SETFL, O_NONBLOCK) < 0) {
     strcpy(buf, "PIPING SETTINGS FAILED\n");
     write(2, buf, strlen(buf));
     return 1;
@@ -69,7 +72,7 @@ int main(int argc, char** argv) {
     write(2, buf, strlen(buf));
     return 1;
   }
-
+  
   fd_set write_set;
   FD_ZERO(&write_set);
   FD_SET(fd0PtC[1], &write_set);
@@ -108,12 +111,16 @@ int main(int argc, char** argv) {
     write(2, buf, strlen(buf));
     exit(1);
   }
-  while((wpid = wait(&status)) > 0) //|| select(fd2CtP[1] + 1, &read_set, &write_set, NULL, NULL) > 0)
+
+  
+  while((wpid = wait(&status)) > 0 ||
+	(nread = read(fd1CtP[0], bufRead, 1024)) > 0 ||
+	(nread2 = read(fd2CtP[0], bufRead2, 1024)) > 0)
     {
     //Stdout
-    FD_ZERO(&write_set);
-    FD_SET(fd0PtC[1], &write_set);
-    nread = read(fd1CtP[0], bufRead, 1024);
+    //FD_ZERO(&write_set);
+    //FD_SET(fd0PtC[1], &write_set);
+    printf("%d\n", nread);
     if(nread < 0) {
       if(errno == EAGAIN) {
 	
@@ -126,13 +133,14 @@ int main(int argc, char** argv) {
     }
     
     else {
+      bufRead[nread] = '\0';
       write(fd1, bufRead, strlen(bufRead));
       write(1, bufRead, strlen(bufRead));
     }
 
     //stderr
-    nread = read(fd2CtP[0], bufRead, 1024);
-    if(nread < 0) {
+    printf("%d\n", nread2);
+    if(nread2 < 0) {
       if(errno == EAGAIN) {
 	
       }
@@ -142,27 +150,31 @@ int main(int argc, char** argv) {
 	write(2, buf, strlen(buf));
       }
     }
+
+    else if(nread2 == 0) {
+
+    }
     
     else {
-      write(fd2, bufRead, strlen(bufRead));
-      write(2, bufRead, strlen(bufRead));
+      bufRead2[nread2] = '\0';
+      write(fd2, bufRead2, strlen(bufRead));
+      write(2, bufRead2, strlen(bufRead));
     }
 
     //stdin
-    /*
     if(select(fd0PtC[1] + 1, NULL, &write_set, NULL, NULL) > 0) {
       if(FD_ISSET(fd0PtC[1], &write_set)) {
-	nread = read(0, bufRead, 1022);
-	bufRead[nread] = '\0'; 
-	write(fd0, bufRead, strlen(bufRead));
+	nread3 = read(0, bufRead3, 1024);
+	bufRead3[nread3] = '\0'; 
+	write(fd0, bufRead3, strlen(bufRead3));
 	//write(0, bufRead, strlen(bufRead));
-	write(fd0PtC[0], bufRead, strlen(bufRead));
+	write(fd0PtC[0], bufRead3, strlen(bufRead3));
       }
     }
-    FD_SET(fd1CtP[0], &read_set);
-    FD_SET(fd2CtP[0], &read_set);
-  
-    */
+    //FD_SET(fd1CtP[0], &read_set);
+    //FD_SET(fd2CtP[0], &read_set);
+    
+    
     }  
   return 0;
 }
