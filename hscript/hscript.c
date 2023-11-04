@@ -24,7 +24,7 @@ int main(int argc, char** argv) {
     return 1;
   }
 
-  if(pipe(fd0CtP) < 0 || pipe(fd0PtC) < 0 || pipe(fd1CtP) < 0 || pipe(fd2CtP) < 0) {
+  if(pipe(fd0PtC) < 0 || pipe(fd1CtP) < 0 || pipe(fd2CtP) < 0) {
     strcpy(buf, "PIPING FAILED\n");
     write(2, buf, strlen(buf));
     return 1;
@@ -32,8 +32,7 @@ int main(int argc, char** argv) {
 
   if(fcntl(fd0PtC[0], F_SETFL, O_NONBLOCK) < 0 ||
      fcntl(fd1CtP[0], F_SETFL, O_NONBLOCK) < 0 ||
-     fcntl(fd2CtP[0], F_SETFL, O_NONBLOCK) < 0 ||
-     fcntl(fd0CtP[0], F_SETFL, O_NONBLOCK) < 0) {
+     fcntl(fd2CtP[0], F_SETFL, O_NONBLOCK) < 0) {
     strcpy(buf, "PIPING SETTINGS FAILED\n");
     write(2, buf, strlen(buf));
     return 1;
@@ -120,7 +119,6 @@ int main(int argc, char** argv) {
     //Stdout
     //FD_ZERO(&write_set);
     //FD_SET(fd0PtC[1], &write_set);
-    printf("%d\n", nread);
     if(nread < 0) {
       if(errno == EAGAIN) {
 	
@@ -139,7 +137,6 @@ int main(int argc, char** argv) {
     }
 
     //stderr
-    printf("%d\n", nread2);
     if(nread2 < 0) {
       if(errno == EAGAIN) {
 	
@@ -157,10 +154,11 @@ int main(int argc, char** argv) {
     
     else {
       bufRead2[nread2] = '\0';
-      write(fd2, bufRead2, strlen(bufRead));
-      write(2, bufRead2, strlen(bufRead));
+      write(fd2, bufRead2, strlen(bufRead2));
+      write(2, bufRead2, strlen(bufRead2));
     }
 
+    /*
     //stdin
     if(select(fd0PtC[1] + 1, NULL, &write_set, NULL, NULL) > 0) {
       if(FD_ISSET(fd0PtC[1], &write_set)) {
@@ -173,7 +171,7 @@ int main(int argc, char** argv) {
     }
     //FD_SET(fd1CtP[0], &read_set);
     //FD_SET(fd2CtP[0], &read_set);
-    
+    */
     
     }  
   return 0;
