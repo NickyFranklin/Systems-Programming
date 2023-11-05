@@ -15,7 +15,6 @@ int main(int argc, char** argv) {
   int error;
   char buf[1000];
   char readBuf[1026];
-  int status = 0;
   int num = 0;
   int fd0, fd1, fd2, fdStdin[2], fdStdout[2], fdStderr[2];
   pid_t cpid;
@@ -98,11 +97,8 @@ int main(int argc, char** argv) {
     close(fdStderr[1]);
   }
 
-  struct pollfd pollFile = {.fd = fdStdin[1],  .events = POLLERR};
-  pid_t pwid;
-  
-  if(poll(&pollFile, 1, 0) < 0) {
-    return 0;
+  if(kill(cpid, 0) < 0) {
+      return 0;
   }
   
   ioctl(0, FIONREAD, &nread);
@@ -136,7 +132,6 @@ int main(int argc, char** argv) {
     
     ioctl(0, FIONREAD, &nread);
     if(nread > 0) {
-      write(1, "1\n", sizeof("1\n"));
       num = read(0, readBuf, 1024);
       write(fd0, readBuf, num);
       write(fdStdin[1], readBuf, num);
@@ -145,8 +140,6 @@ int main(int argc, char** argv) {
     //write(1, "2\n", sizeof("1\n"));
     ioctl(fdStdout[0], FIONREAD, &nread2);
     if(nread2 > 0) {
-      //write(1, "2\n", sizeof("1\n"));
-      write(2, "1\n", sizeof("1\n"));
       num = read(fdStdout[0], readBuf, 1024);
       write(fd1, readBuf, num);
       write(1, readBuf, num);
@@ -155,8 +148,6 @@ int main(int argc, char** argv) {
     //write(1, "3\n", sizeof("1\n"));
     ioctl(fdStderr[0], FIONREAD, &nread3);
     if(nread3 > 0) {
-      //write(1, "3\n", sizeof("1\n"));
-      write(3, "1\n", sizeof("1\n"));
       num = read(fdStderr[0], readBuf, 1024);
       write(fd2, readBuf, num);
       write(2, readBuf, num);

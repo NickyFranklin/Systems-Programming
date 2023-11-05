@@ -15,7 +15,6 @@ int main(int argc, char** argv) {
   int error;
   char buf[1000];
   char readBuf[1026];
-  int status = 0;
   int num = 0;
   int fd0, fd1, fd2, fdStdin[2], fdStdout[2], fdStderr[2];
   pid_t cpid;
@@ -98,11 +97,8 @@ int main(int argc, char** argv) {
     close(fdStderr[1]);
   }
 
-  struct pollfd pollFile = {.fd = fdStdin[1],  .events = POLLERR};
-  pid_t pwid;
-  
-  if(poll(&pollFile, 1, 0) < 0) {
-    return 0;
+  if(kill(cpid, 0) < 0) {
+      return 0;
   }
   
   ioctl(0, FIONREAD, &nread);
