@@ -5,18 +5,15 @@
 
 int main() {
   char buf[1024];
-  for(int j = 0; j < 5; j++) {
-    for(int i = 0; i < 500; i++) {
-      write(1, "a", 1);
-    }
-    write(1, "\n", 1);
+  int num;
+  for(int i = 0; i < 3; i++) {
+    num = read(0, buf, 1024);
+    buf[num] = '\0';
+    write(1, buf, strlen(buf));
+    write(2, buf, strlen(buf));
   }
-  int error;
-  error = read(0, buf, 1024);
-  if(error < 0) {
-    write(2, "ERROR", sizeof("ERROR"));
-  }
-  //write(2, buf, strlen(buf));
+  
+  write(1, "Balls\n", sizeof("Balls\n"));
   
   return 0;
 }

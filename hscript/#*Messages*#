@@ -1,0 +1,42 @@
+Loading /usr/share/emacs/site-lisp/site-start.d/autoconf-init.el (source)...done
+Loading /usr/share/emacs/site-lisp/site-start.d/cmake-init.el (source)...done
+Loading /usr/share/emacs/site-lisp/site-start.d/desktop-entry-mode-init.el (source)...done
+Loading /usr/share/emacs/site-lisp/site-start.d/rpmdev-init.el (source)...done
+Loading /usr/share/emacs/site-lisp/site-start.d/systemtap-init.el (source)...done
+For information about GNU Emacs and the GNU system, type C-h C-a.
+(New file)
+Wrote /home/nicky/Documents/GitHub/cs3411/hscript/hscript2.c
+Saving file /home/nicky/Documents/GitHub/cs3411/hscript/hscript2.c...
+Wrote /home/nicky/Documents/GitHub/cs3411/hscript/hscript2.c
+Saving file /home/nicky/Documents/GitHub/cs3411/hscript/hscript2.c...
+Wrote /home/nicky/Documents/GitHub/cs3411/hscript/hscript2.c
+Auto-saving...done
+Auto-saving...done
+Auto-saving...done
+Auto-saving...done
+Saving file /home/nicky/Documents/GitHub/cs3411/hscript/hscript2.c...
+Wrote /home/nicky/Documents/GitHub/cs3411/hscript/hscript2.c
+Saving file /home/nicky/Documents/GitHub/cs3411/hscript/hscript2.c...
+Wrote /home/nicky/Documents/GitHub/cs3411/hscript/hscript2.c
+Auto-saving...done
+Auto-saving...done
+Auto-saving...done
+Saving file /home/nicky/Documents/GitHub/cs3411/hscript/hscript2.c...
+Wrote /home/nicky/Documents/GitHub/cs3411/hscript/hscript2.c
+Auto-saving...done
+Saving file /home/nicky/Documents/GitHub/cs3411/hscript/hscript2.c...
+Wrote /home/nicky/Documents/GitHub/cs3411/hscript/hscript2.c
+(No changes need to be saved) [3 times]
+Saving file /home/nicky/Documents/GitHub/cs3411/hscript/hscript2.c...
+Wrote /home/nicky/Documents/GitHub/cs3411/hscript/hscript2.c
+Saving file /home/nicky/Documents/GitHub/cs3411/hscript/hscript2.c...
+Wrote /home/nicky/Documents/GitHub/cs3411/hscript/hscript2.c
+(No changes need to be saved)
+next-line: End of buffer
+read-file-name-default: Command attempted to use minibuffer while in minibuffer [2 times]
+C-c C-c is undefined
+C-c RET is undefined
+Wrote /home/nicky/Documents/GitHub/cs3411/hscript/*Messages*
+Buffer is read-only: #<buffer *Messages*>
+byte-code: The mark is not set now, so there is no region [2 times]
+byte-code: The mark is not set now, so there is no region

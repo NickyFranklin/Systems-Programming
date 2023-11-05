@@ -136,7 +136,6 @@ int main(int argc, char** argv) {
     
     ioctl(0, FIONREAD, &nread);
     if(nread > 0) {
-      write(1, "1\n", sizeof("1\n"));
       num = read(0, readBuf, 1024);
       write(fd0, readBuf, num);
       write(fdStdin[1], readBuf, num);
@@ -145,8 +144,6 @@ int main(int argc, char** argv) {
     //write(1, "2\n", sizeof("1\n"));
     ioctl(fdStdout[0], FIONREAD, &nread2);
     if(nread2 > 0) {
-      //write(1, "2\n", sizeof("1\n"));
-      write(2, "1\n", sizeof("1\n"));
       num = read(fdStdout[0], readBuf, 1024);
       write(fd1, readBuf, num);
       write(1, readBuf, num);
@@ -155,8 +152,6 @@ int main(int argc, char** argv) {
     //write(1, "3\n", sizeof("1\n"));
     ioctl(fdStderr[0], FIONREAD, &nread3);
     if(nread3 > 0) {
-      //write(1, "3\n", sizeof("1\n"));
-      write(3, "1\n", sizeof("1\n"));
       num = read(fdStderr[0], readBuf, 1024);
       write(fd2, readBuf, num);
       write(2, readBuf, num);
