@@ -1,0 +1,22 @@
+#include "rp_client.h"
+#include <string.h>
+#include <stdlib.h>
+#include <stdio.h>
+#include <fnctl.h>
+#include <unistd.h>
+
+int main(int argc, char *argv[]) {
+  int remoteFd = rp_open("rp_userCreate.txt", O_CREAT | O_TRUNC | O_RDWR, 0666);
+
+  char buf[1024];
+  sprintf(buf, "There was once a test file that test filed really hard\n");
+    
+  int err = rp_write(remoteFd, buf, strlen(buf));
+
+  
+  //int localFd = open("user1File.txt", O_TRUNC | O_CREAT | O_RDWR, 0777);
+  
+  
+  
+  return 0;
+}
