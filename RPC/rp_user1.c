@@ -6,18 +6,27 @@
 #include <unistd.h>
 
 int main(int argc, char *argv[]) {
-  int remoteFd = rp_open("", O_RDONLY);
+  int remoteFd = rp_open("rp_client.c", O_RDONLY);
 
   char buf[1024];
+  int err;
+  
   int localFd = open("user1File.txt", O_TRUNC | O_CREAT | O_RDWR, 0777);
 
-  err = rp_lseek(remoteFd, 0, SEEK_SET);
   
-  err = rp_read(remoteFd, buf2, 1024);
-  printf("number read: %d\n", err);
+  do {
+    err = rp_read(remoteFd, buf, 1024);
+    printf("number read: %d\n", err);
 
-  err = write(localFd, buf2, strlen(buf2));
-  printf("number wrote: %d\n", err);
+    if(err > 0) {
+      write(localFd, buf, strlen(buf));
+    }
+
+    for(int i = 0; i < (int) strlen(buf); i++) {
+      buf[i] = '\0';
+    }
+    
+  } while(err > 0);
 
   rp_close(remoteFd);
   close(localFd);
