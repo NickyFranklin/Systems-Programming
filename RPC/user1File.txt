@@ -358,38 +358,3 @@ short rp_checksum(int fd) {
     
     return -1;  
 }
-rgumnents given, return result to user, and set errno accordingly
-  return lseek(fd, offset, whence);
-    
-    /************************************/
-    //         PART 2 OF PROJECT        //                                    
-    /************************************/
-    
-    // Send type of call to server
-    
-    // Send each argument to the server
-    
-    // Read return of open coming back from server 
-
-    // Read errno sent from server
-    
-    // Return result
-
-}
-
-
-/*************************/
-//      RP_CHECKSUM      //
-/*************************/
-
-short rp_checksum(int fd) {
-   
-    /************************************/
-    //         PART 2 OF PROJECT        //                                    
-    /************************************/
-
-    unsigned char checksum = 0;
-    
-    // Send type of call to server
-    
-    // Send each argument to š
