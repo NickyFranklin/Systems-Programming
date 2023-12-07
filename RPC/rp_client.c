@@ -179,11 +179,10 @@ int rp_connect(const char *address, unsigned short port){
     //bind(sock_fd, (struct sockaddr*) &server_addr, sizeof(server_addr));
     
     // 6. Connect to server by calling connect()
-    connect(sock_fd);
+    int err = connect(sock_fd, (struct sockaddr*) &server_addr, host->hlength);
 
-    int err = connect(sock_fd, );
     // 7. Return 0 on success and return -1 on error
-    return 0;
+    return err;
 }
 
 
@@ -225,13 +224,18 @@ int rp_open(const char *pathname, int flags, ...) {
     
     // Send type of call to server
     
+    
     // Send each argument to the server (pathname, flags, mode)
+
     
     // Read return of open coming back from server 
 
+    
     // Read errno sent from server
 
+    
     // Return the return of open
+    
 }
 
 

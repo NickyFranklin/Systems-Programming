@@ -179,14 +179,28 @@ int checksum(int fd) {
 
 void handle_open() {
        
-        // Read in the argumets of sent by client 
+  // Read in the argumets of sent by client 
+  char *pathname;
+  int *flags;
+  mode_t *mode;
+  
+  int fd;
+  
+  pathname = read_from_client();
+  flags = (int *) read_from_client();
+  mode = (mode_t *) read_from_client();
+  // Call the syscall with arguments
+  fd = open(pathname, *flags, *mode);
+  
+  // Send the return of open to the client
+  send_to_client(fd, sizeof(int));
+  
+  // Send the errno information to the client
+  send_to_client(
 
-        // Call the syscall with arguments
-
-        // Send the return of open to the client
-
-        // Send the errno information to the client
-
+  free(pathname);
+  free(flags);
+  free(mode);
 } 
 
 
@@ -196,14 +210,14 @@ void handle_open() {
 
 void handle_close() {
         
-        // Read in the argumets of sent by client 
-
-        // Call the syscall with arguments
-
-        // Send the return of open to the client
-
-        // Send the errno information to the client
-
+  // Read in the argumets of sent by client 
+  
+  // Call the syscall with arguments
+  
+  // Send the return of open to the client
+  
+  // Send the errno information to the client
+  
 } 
 
 
@@ -212,17 +226,17 @@ void handle_close() {
 /*************************/
 
 void handle_read() {
-        
-        // Read in the argumets of sent by client 
-
-        // Call the syscall with arguments
-
-        // Send the return of open to the client
-
-        // Send the errno information to the client
-        
-        // Send the read data to the client
-
+  
+  // Read in the argumets of sent by client 
+  
+  // Call the syscall with arguments
+  
+  // Send the return of open to the client
+  
+  // Send the errno information to the client
+  
+  // Send the read data to the client
+  
 } 
 
 
@@ -231,15 +245,15 @@ void handle_read() {
 /*************************/
 
 void handle_write() {
-        
-        // Read in the argumets of sent by client 
-
-        // Call the syscall with arguments
-
-        // Send the return of open to the client
-
-        // Send the errno information to the client
-
+  
+  // Read in the argumets of sent by client 
+  
+  // Call the syscall with arguments
+  
+  // Send the return of open to the client
+  
+  // Send the errno information to the client
+  
 } 
 
 
@@ -248,15 +262,15 @@ void handle_write() {
 /*************************/
 
 void handle_lseek() {
-        
-        // Read in the argumets of sent by client 
+  
+  // Read in the argumets of sent by client 
+  
+  // Call the syscall with arguments
 
-        // Call the syscall with arguments
-
-        // Send the return of open to the client
-
-        // Send the errno information to the client
-
+  // Send the return of open to the client
+  
+  // Send the errno information to the client
+  
 } 
 
 
@@ -265,15 +279,15 @@ void handle_lseek() {
 /*************************/
 
 void handle_checksum() {
-        
-        // Read in the argumets of sent by client 
+  
+  // Read in the argumets of sent by client 
 
-        // Call the syscall with arguments
-
-        // Send the return of open to the client
-
-        // Send the errno information to the client
-
+  // Call the syscall with arguments
+  
+  // Send the return of open to the client
+  
+  // Send the errno information to the client
+  
 }
 
 
@@ -286,14 +300,21 @@ int main() {
     struct sockaddr_in client_addr, server_addr;
 
     // Zero out server and client addr structs
-
+    bzero((char*) &client_addr, sizeof(client_addr));
+    bzero((char*) &server_addr, sizeof(server_addr));
+    
     // Get socket file descriptor
-    const int sock_fd = 0;
+    const int sock_fd = socket(AF_INET, SOCK_STREAM, 0);
    
     // Load server address information (family, sin_addr.s_addr, sin_port)
-
+    server_addr.sin_family = (short) AF_INET;
+    server_addr.sin_addr.s_addr = htonl(INADOR_ANY);
+    server_addr.sin_port = htons(0);
+    
     // Bind server address to socket
-   
+    bind(sock_fd, (struct sockaddr*) &server_addr, sizeof(server_addr));
+
+    
     // These lines will print out the port number used and write
     // it to a file that will be used by the grader
     //                          
@@ -303,7 +324,9 @@ int main() {
     getsockname(sock_fd,(struct sockaddr *) &server_addr, &s_len);
     this_is_for_the_autograder_do_not_delete(ntohs(server_addr.sin_port));
 
-    // Set socket to listen for connections    
+    // Set socket to listen for connections
+    //The backlog number can be set higher for more connections
+    listen(sock_fd, 1);
     
     /************************************/
     //         PART 2 OF PROJECT        //                                    
@@ -318,14 +341,46 @@ int main() {
         dup2(conn, 1);
         close(conn); 
 
+	socklen_t s_len2 = sizeof(client_addr);
+	conn = accept(sock_fd, (struct sockaddr*) &client_addr, (socklen_t*) &s_len2);
         // Read the type sent by the client
-
+	char *string = read_from_client();
+	
         // Do the appropriate action for the type sent by calling the appropriate handler
-        
+	while(string != NULL) {
+	  if(strcmp(string, "open") == 0) {
+	    handle_open();
+	  }
+	  
+	  else if(strcmp(string, "read") == 0) {
+	    handle_read();
+	  }
+	  
+	  else if(strcmp(string, "write") == 0) {
+	    handle_write();
+	  }
+	  
+	  else if(strcmp(string, "close") == 0) {
+	    handle_close();
+	  }
+	  
+	  else if(strcmp(string, "lseek") == 0) {
+	    handle_lseek();
+	  }
+	  
+	  else if(strcmp(string, "checksum") == 0) {
+	    handle_checksum();
+	  }
+
+	  free(string);
+	  string = read_from_client();
+	}
         // Wait for more commands (maybe a loop)
-        
+	
+	
         // Exit when EOF is sent to server (i.e. child has closed the connection)
 
+	
     /************************************/
     //        PART 2.5 OF PROJECT       //                                    
     /************************************/
