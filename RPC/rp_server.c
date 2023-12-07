@@ -166,14 +166,14 @@ int checksum(int fd) {
   // Seek to beginning of file
   lseek(fd, 0, SEEK_SET);
   char buf[4096];
-  unsigned char checksum = 0;
+  unsigned char checkSum = 0;
   int num;
   num = read(fd, buf, 4096);
   // Read blocks of size 4096 from file
   // Parse all 4096 bytes in block and perform checksum
   while(num > 0) {
     for(int i = 0; i < num; i++) {
-      checksum ^= buf[i];
+      checkSum ^= buf[i];
     }
 
     num = read(fd, buf, 4096);
@@ -181,7 +181,7 @@ int checksum(int fd) {
 
   
   // Return the checksum computed
-  return checksum;
+  return checkSum;
 }
 
 
@@ -201,7 +201,7 @@ void handle_open() {
   pathname = read_from_client();
   flags = (int *) read_from_client();
   // Call the syscall with arguments
-  if((O_CREAT & flags) > 0) {
+  if((O_CREAT & *flags) > 0) {
     mode = (mode_t *) read_from_client();
     fd = open(pathname, *flags, *mode);
     free(mode);
@@ -211,10 +211,10 @@ void handle_open() {
     fd = open(pathname, *flags);
   }
   // Send the return of open to the client
-  send_to_client(fd, sizeof(int));
+  send_to_client(&fd, sizeof(int));
   
   // Send the errno information to the client
-  send_to_client(errno, sizeof(errno));
+  send_to_client(&errno, sizeof(errno));
 
   free(pathname);
   free(flags);
@@ -234,10 +234,10 @@ void handle_close() {
   int err = close(*fd);
   
   // Send the return of open to the client
-  send_to_client(err, sizeof(int));
+  send_to_client(&err, sizeof(int));
   
   // Send the errno information to the client
-  send_to_client(errno, sizeof(int));
+  send_to_client(&errno, sizeof(int));
   
   free(fd);
 } 
@@ -258,8 +258,8 @@ void handle_read() {
   // Call the syscall with arguments
   num = read(*fd, buf, *count);
   
-  send_to_client(num, sizeof(int));
-  send_to_client(errno, sizeof(int));
+  send_to_client(&num, sizeof(int));
+  send_to_client(&errno, sizeof(int));
 
   free(fd);
   free(buf);
@@ -283,11 +283,14 @@ void handle_write() {
   num = write(*fd, buf, *count);
   
   // Send the return of open to the client
-  send_to_client(num, sizeof(int));
+  send_to_client(&num, sizeof(int));
   
   // Send the errno information to the client
-  send_to_client(errno, sizeof(int));
-  
+  send_to_client(&errno, sizeof(int));
+
+  free(fd);
+  free(buf);
+  free(count);
 } 
 
 
@@ -307,11 +310,14 @@ void handle_lseek() {
   num = lseek(*fd, *offset, *whence);
   
   // Send the return of open to the client
-  send_to_client(num, sizeof(off_t));
+  send_to_client(&num, sizeof(off_t));
   
   // Send the errno information to the client
-  send_to_client(errno, sizeof(int));
-  
+  send_to_client(&errno, sizeof(int));
+
+  free(fd);
+  free(offset);
+  free(whence);
 } 
 
 
@@ -323,12 +329,17 @@ void handle_checksum() {
   
   // Read in the argumets of sent by client 
   int *fd = (int *) read_from_client();
+
   // Call the syscall with arguments
+  unsigned char checkSum = (unsigned char) checksum(*fd);
   
   // Send the return of open to the client
+  send_to_client(&checkSum, sizeof(checkSum));
   
   // Send the errno information to the client
-  
+  send_to_client(&errno, sizeof(errno));
+
+  free(fd);
 }
 
 
@@ -349,7 +360,7 @@ int main() {
    
     // Load server address information (family, sin_addr.s_addr, sin_port)
     server_addr.sin_family = (short) AF_INET;
-    server_addr.sin_addr.s_addr = htonl(INADOR_ANY);
+    server_addr.sin_addr.s_addr = htonl(INADDR_ANY);
     server_addr.sin_port = htons(0);
     
     // Bind server address to socket
@@ -375,7 +386,8 @@ int main() {
         
         // Wait for client to connect
         const int conn = 0;
-        
+	int listener = 0;
+	
         // Redirects stdin and stdout to the socket
         // These lines must be here to work with the send_to_client and read_from_client functions
         dup2(conn, 0);
@@ -383,8 +395,11 @@ int main() {
         close(conn); 
 
 	socklen_t s_len2 = sizeof(client_addr);
-	conn = accept(sock_fd, (struct sockaddr*) &client_addr, (socklen_t*) &s_len2);
-        // Read the type sent by the client
+	listener = accept(sock_fd, (struct sockaddr*) &client_addr, (socklen_t*) &s_len2);
+	if(listener < 0) {
+	  return -1;
+	}
+	// Read the type sent by the client
 	char *string = read_from_client();
 	
         // Do the appropriate action for the type sent by calling the appropriate handler

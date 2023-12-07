@@ -161,7 +161,7 @@ int rp_connect(const char *address, unsigned short port){
     
     // 3. Zero out struct with bzero
 
-    bzero((char *) &server_adddr, sizeof(server_addr));
+    bzero((char *) &server_addr, sizeof(server_addr));
     
     // 4. Set up the rest of the struct fields (family, sin_addr, and port)
 
@@ -179,7 +179,7 @@ int rp_connect(const char *address, unsigned short port){
     //bind(sock_fd, (struct sockaddr*) &server_addr, sizeof(server_addr));
     
     // 6. Connect to server by calling connect()
-    int err = connect(sock_fd, (struct sockaddr*) &server_addr, host->hlength);
+    int err = connect(sock_fd, (struct sockaddr*) &server_addr, host->h_length);
 
     // 7. Return 0 on success and return -1 on error
     return err;
@@ -203,6 +203,7 @@ int rp_open(const char *pathname, int flags, ...) {
     
     if((O_CREAT & flags) > 0) {
       mode = va_arg(arg_list, mode_t);
+      
     }
 
     else {
@@ -216,26 +217,36 @@ int rp_open(const char *pathname, int flags, ...) {
     /************************************/
     
     // Call the syscall with argumnents given, return result to user, and set errno accordingly
-    return open(pathname, flags, mode);
+    //return open(pathname, flags, mode);
 
     /************************************/
     //         PART 2 OF PROJECT        //                                    
     /************************************/
     
     // Send type of call to server
-    
-    
-    // Send each argument to the server (pathname, flags, mode)
+    char *buf = "open";
+    send_to_server(buf, sizeof(buf));
 
+    char *path = pathname;
+    // Send each argument to the server (pathname, flags, mode)
+    send_to_server(path, sizeof(path));
+    send_to_server(&flags, sizeof(flags));
     
     // Read return of open coming back from server 
-
+    int *file = read_from_server();
+    int realFile = *file;
+    free(file);
     
     // Read errno sent from server
+    int *err = read_from_server();
+    int realerr = *err;
+    free(err);
 
+    errno = realerr;
+    
+    return realFile;
     
     // Return the return of open
-    
 }
 
 
@@ -244,27 +255,27 @@ int rp_open(const char *pathname, int flags, ...) {
 /*************************/
 
 int rp_close(int fd){
-
-    /************************************/
-    //         PART 1 OF PROJECT        //                                    
-    /************************************/
-
-    // Call the syscall with argumnents given, return result to user, and set errno accordingly
-  return close(fd);
-    
-    /************************************/
-    //         PART 2 OF PROJECT        //                                    
-    /************************************/
-    
-    // Send type of call to server
-    
-    // Send each argument to the server
-    
-    // Read return of open coming back from server 
-
-    // Read errno sent from server
-    
-    // Return result
+  
+  // Send type of call to server
+  char *buf = "close";
+  send_to_server(buf, sizeof(buf));
+  
+  // Send each argument to the server (pathname, flags, mode)
+  send_to_server(&fd, sizeof(fd));
+  
+  // Read return of open coming back from server 
+  int *result = read_from_server();
+  int trueResult = *result;
+  free(result);
+  
+  // Read errno sent from server
+  int *err = read_from_server();
+  int realerr = *err;
+  free(err);
+  
+  errno = realerr;
+  
+  return trueResult;
 
 }
 
@@ -274,28 +285,27 @@ int rp_close(int fd){
 /*************************/
 
 ssize_t rp_read(int fd, void *buf, size_t count) {
-
-    /************************************/
-    //         PART 1 OF PROJECT        //                                    
-    /************************************/
-
-    // Call the syscall with argumnents given, return result to user, and set errno accordingly
-  return read(fd, buf, count);
-    
-    /************************************/
-    //         PART 2 OF PROJECT        //                                    
-    /************************************/
-    
-    // Send type of call to server
-    
-    // Send each argument to the server
-    
-    // Read return of open coming back from server 
-
-    // Read errno sent from server
-    
-    // Return result
-
+  // Send type of call to server
+  char *buffer = "read";
+  send_to_server(buffer, sizeof(buffer));
+  
+  // Send each argument to the server
+  send_to_server(&fd, sizeof(fd));
+  send_to_server(buf, sizeof(buf));
+  send_to_server(count, sizeof(count));
+  
+  // Read return of open coming back from server 
+  int *result = read_from_server();
+  int trueResult = *result;
+  free(result);
+  
+  // Read errno sent from server
+  int *err = read_from_server();
+  errno = *err;
+  free(err);
+  
+  // Return result
+  return trueResult;
 }
 
 
@@ -304,28 +314,27 @@ ssize_t rp_read(int fd, void *buf, size_t count) {
 /*************************/
 
 ssize_t rp_write(int fd, const void *buf, size_t count) {
-
-    /************************************/
-    //         PART 1 OF PROJECT        //                                    
-    /************************************/
-
-    // Call the syscall with argumnents given, return result to user, and set errno accordingly
-  return write(fd, buf, count);
-    
-    /************************************/
-    //         PART 2 OF PROJECT        //                                    
-    /************************************/
-    
-    // Send type of call to server
-    
-    // Send each argument to the server
-    
-    // Read return of open coming back from server 
-
-    // Read errno sent from server
-    
-    // Return result
-
+  // Send type of call to server
+  char *buffer = "write";
+  send_to_server(buffer, sizeof(buffer));
+  
+  // Send each argument to the server
+  send_to_server(&fd, sizeof(fd));
+  send_to_server(buf, sizeof(buf));
+  send_to_server(&count, sizeof(count));
+  
+  // Read return of open coming back from server 
+  int *result = read_from_server();
+  int trueResult = *result;
+  free(result);
+  
+  // Read errno sent from server
+  int *err = read_from_server();
+  errno = *err;
+  free(err);
+  
+  // Return result
+  return trueResult;
 }
 
 
@@ -334,28 +343,28 @@ ssize_t rp_write(int fd, const void *buf, size_t count) {
 /*************************/
 
 off_t rp_lseek(int fd, off_t offset, int whence) {
-
-    /************************************/
-    //         PART 1 OF PROJECT        //                                    
-    /************************************/
-
-    // Call the syscall with argumnents given, return result to user, and set errno accordingly
-  return lseek(fd, offset, whence);
-    
-    /************************************/
-    //         PART 2 OF PROJECT        //                                    
-    /************************************/
-    
-    // Send type of call to server
-    
-    // Send each argument to the server
-    
-    // Read return of open coming back from server 
-
-    // Read errno sent from server
-    
-    // Return result
-
+  // Send type of call to server
+  char *buffer = "lseek";
+  send_to_server(buffer, sizeof(buffer));
+  
+  // Send each argument to the server
+  send_to_server(&fd, sizeof(fd));
+  send_to_server(&offset, sizeof(offset));
+  send_to_server(&whence, sizeof(whence));
+  
+  // Read return of open coming back from server 
+  int *result = read_from_server();
+  int trueResult = *result;
+  free(result);
+  
+  // Read errno sent from server
+  int *err = read_from_server();
+  errno = *err;
+  free(err);
+  
+  // Return result
+  return trueResult;
+  
 }
 
 
@@ -364,22 +373,25 @@ off_t rp_lseek(int fd, off_t offset, int whence) {
 /*************************/
 
 short rp_checksum(int fd) {
-   
-    /************************************/
-    //         PART 2 OF PROJECT        //                                    
-    /************************************/
-
     unsigned char checksum = 0;
     
     // Send type of call to server
+    char *buf = "checksum";
+    send_to_server(buf, sizeof(buf));
     
     // Send each argument to the server
+    send_to_server(&fd, sizeof(fd));
     
     // Read return of open coming back from server 
-
+    unsigned char *result = read_from_server();
+    unsigned char trueResult = *result;
+    free(result);
+    
     // Read errno sent from server
+    int *err = read_from_server();
+    errno = *err;
+    free(err);
     
     // Return result
-    
-    return -1;  
+    return trueResult;  
 }
