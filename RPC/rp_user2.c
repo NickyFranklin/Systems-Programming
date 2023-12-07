@@ -6,12 +6,26 @@
 #include <unistd.h>
 
 int main(int argc, char *argv[]) {
-  int remoteFd = rp_open("rp_client.c", O_RDONLY);
+  /*
+  if(argc < 4) {
+    return -1;
+  }
+
+  if(rp_connect(argv[1], atoi(argv[2]))) {
+    return -1;
+  }
+  */
+
+  if(argc < 1) {
+    return -1;
+  }
+  
+  int remoteFd = rp_open(argv[3], O_RDONLY);
   
   char buf[1024];
   int err;
 
-  int localFd = open("user2File.txt", O_TRUNC | O_CREAT | O_RDWR, 0777);
+  int localFd = open(argv[4], O_TRUNC | O_CREAT | O_RDWR, 0777);
 
   rp_lseek(remoteFd, 10, SEEK_SET);
   

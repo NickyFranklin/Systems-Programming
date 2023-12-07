@@ -405,6 +405,7 @@ int main() {
         // Do the appropriate action for the type sent by calling the appropriate handler
 	while(string != NULL) {
 	  if(strcmp(string, "open") == 0) {
+	    write(2, "here\n", sizeof("here\n"));
 	    handle_open();
 	  }
 	  

@@ -156,6 +156,7 @@ int rp_connect(const char *address, unsigned short port){
 
     host = gethostbyname(address);
     if(!host) {
+      write(2, "here\n", sizeof("here\n"));
       exit(1);
     }
     
@@ -180,7 +181,7 @@ int rp_connect(const char *address, unsigned short port){
     
     // 6. Connect to server by calling connect()
     int err = connect(sock_fd, (struct sockaddr*) &server_addr, host->h_length);
-
+    //write(2, "here\n", sizeof("here\n"));
     // 7. Return 0 on success and return -1 on error
     return err;
 }
@@ -227,10 +228,15 @@ int rp_open(const char *pathname, int flags, ...) {
     char *buf = "open";
     send_to_server(buf, sizeof(buf));
 
-    char *path = pathname;
+    char *path = malloc(4000);
+    strcpy(path, pathname);
     // Send each argument to the server (pathname, flags, mode)
     send_to_server(path, sizeof(path));
     send_to_server(&flags, sizeof(flags));
+
+    if((O_CREAT & flags) > 0) {
+      send_to_server(&mode, sizeof(mode));
+    }
     
     // Read return of open coming back from server 
     int *file = read_from_server();
@@ -241,7 +247,8 @@ int rp_open(const char *pathname, int flags, ...) {
     int *err = read_from_server();
     int realerr = *err;
     free(err);
-
+    free(path);
+    
     errno = realerr;
     
     return realFile;
@@ -292,7 +299,7 @@ ssize_t rp_read(int fd, void *buf, size_t count) {
   // Send each argument to the server
   send_to_server(&fd, sizeof(fd));
   send_to_server(buf, sizeof(buf));
-  send_to_server(count, sizeof(count));
+  send_to_server(&count, sizeof(count));
   
   // Read return of open coming back from server 
   int *result = read_from_server();
@@ -317,17 +324,19 @@ ssize_t rp_write(int fd, const void *buf, size_t count) {
   // Send type of call to server
   char *buffer = "write";
   send_to_server(buffer, sizeof(buffer));
-  
+
+  char *buf2 = malloc(1000000000);
+  strcpy(buf2, buf);
   // Send each argument to the server
   send_to_server(&fd, sizeof(fd));
-  send_to_server(buf, sizeof(buf));
+  send_to_server(buf2, sizeof(buf2));
   send_to_server(&count, sizeof(count));
   
   // Read return of open coming back from server 
   int *result = read_from_server();
   int trueResult = *result;
   free(result);
-  
+  free(buf2);
   // Read errno sent from server
   int *err = read_from_server();
   errno = *err;
@@ -372,26 +381,24 @@ off_t rp_lseek(int fd, off_t offset, int whence) {
 //      RP_CHECKSUM      //
 /*************************/
 
-short rp_checksum(int fd) {
-    unsigned char checksum = 0;
-    
-    // Send type of call to server
-    char *buf = "checksum";
-    send_to_server(buf, sizeof(buf));
-    
-    // Send each argument to the server
-    send_to_server(&fd, sizeof(fd));
-    
-    // Read return of open coming back from server 
-    unsigned char *result = read_from_server();
-    unsigned char trueResult = *result;
-    free(result);
-    
-    // Read errno sent from server
-    int *err = read_from_server();
-    errno = *err;
-    free(err);
-    
-    // Return result
-    return trueResult;  
+short rp_checksum(int fd) { 
+  // Send type of call to server
+  char *buf = "checksum";
+  send_to_server(buf, sizeof(buf));
+  
+  // Send each argument to the server
+  send_to_server(&fd, sizeof(fd));
+  
+  // Read return of open coming back from server 
+  unsigned char *result = read_from_server();
+  unsigned char trueResult = *result;
+  free(result);
+  
+  // Read errno sent from server
+  int *err = read_from_server();
+  errno = *err;
+  free(err);
+  
+  // Return result
+  return trueResult;  
 }
