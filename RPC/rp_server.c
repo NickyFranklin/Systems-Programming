@@ -163,13 +163,25 @@ int send_to_client(void *data, size_t size){
 
 int checksum(int fd) {
     
-    // Seek to beginning of file
-    
-    // Read blocks of size 4096 from file
-        // Parse all 4096 bytes in block and perform checksum
-    
-    // Return the checksum computed
-    return -1;
+  // Seek to beginning of file
+  lseek(fd, 0, SEEK_SET);
+  char buf[4096];
+  unsigned char checksum = 0;
+  int num;
+  num = read(fd, buf, 4096);
+  // Read blocks of size 4096 from file
+  // Parse all 4096 bytes in block and perform checksum
+  while(num > 0) {
+    for(int i = 0; i < num; i++) {
+      checksum ^= buf[i];
+    }
+
+    num = read(fd, buf, 4096);
+  }
+
+  
+  // Return the checksum computed
+  return checksum;
 }
 
 
@@ -188,19 +200,24 @@ void handle_open() {
   
   pathname = read_from_client();
   flags = (int *) read_from_client();
-  mode = (mode_t *) read_from_client();
   // Call the syscall with arguments
-  fd = open(pathname, *flags, *mode);
-  
+  if((O_CREAT & flags) > 0) {
+    mode = (mode_t *) read_from_client();
+    fd = open(pathname, *flags, *mode);
+    free(mode);
+  }
+
+  else {
+    fd = open(pathname, *flags);
+  }
   // Send the return of open to the client
   send_to_client(fd, sizeof(int));
   
   // Send the errno information to the client
-  send_to_client(
+  send_to_client(errno, sizeof(errno));
 
   free(pathname);
   free(flags);
-  free(mode);
 } 
 
 
@@ -211,13 +228,18 @@ void handle_open() {
 void handle_close() {
         
   // Read in the argumets of sent by client 
+  int* fd = (int *) read_from_client();
   
   // Call the syscall with arguments
+  int err = close(*fd);
   
   // Send the return of open to the client
+  send_to_client(err, sizeof(int));
   
   // Send the errno information to the client
+  send_to_client(errno, sizeof(int));
   
+  free(fd);
 } 
 
 
@@ -228,15 +250,20 @@ void handle_close() {
 void handle_read() {
   
   // Read in the argumets of sent by client 
+  int *fd = (int *) read_from_client();
+  char *buf = read_from_client();
+  size_t *count = (size_t *) read_from_client();
+  int num;
   
   // Call the syscall with arguments
+  num = read(*fd, buf, *count);
   
-  // Send the return of open to the client
-  
-  // Send the errno information to the client
-  
-  // Send the read data to the client
-  
+  send_to_client(num, sizeof(int));
+  send_to_client(errno, sizeof(int));
+
+  free(fd);
+  free(buf);
+  free(count);
 } 
 
 
@@ -247,12 +274,19 @@ void handle_read() {
 void handle_write() {
   
   // Read in the argumets of sent by client 
-  
+  int *fd = (int *) read_from_client();
+  char *buf = read_from_client();
+  size_t *count = (size_t *) read_from_client();
+  int num;
+
   // Call the syscall with arguments
+  num = write(*fd, buf, *count);
   
   // Send the return of open to the client
+  send_to_client(num, sizeof(int));
   
   // Send the errno information to the client
+  send_to_client(errno, sizeof(int));
   
 } 
 
@@ -264,12 +298,19 @@ void handle_write() {
 void handle_lseek() {
   
   // Read in the argumets of sent by client 
+  int *fd = (int *) read_from_client();
+  off_t *offset = (off_t *) read_from_client();
+  int *whence = (int *) read_from_client();
+  off_t num;
   
   // Call the syscall with arguments
-
+  num = lseek(*fd, *offset, *whence);
+  
   // Send the return of open to the client
+  send_to_client(num, sizeof(off_t));
   
   // Send the errno information to the client
+  send_to_client(errno, sizeof(int));
   
 } 
 
@@ -281,7 +322,7 @@ void handle_lseek() {
 void handle_checksum() {
   
   // Read in the argumets of sent by client 
-
+  int *fd = (int *) read_from_client();
   // Call the syscall with arguments
   
   // Send the return of open to the client
