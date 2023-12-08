@@ -6,22 +6,18 @@
 #include <unistd.h>
 
 int main(int argc, char *argv[]) {
-  /*
-  if(argc < 4) {
-    return -1;
-  }
-
+  
   if(rp_connect(argv[1], atoi(argv[2]))) {
+    write(2, "bad connect\n", sizeof("bad connect\n"));
     return -1;
   }
-  */
+  
 
   if(argc < 1) {
     return -1;
   }
   
-  int remoteFd = rp_open(argv[3], O_RDONLY);
-  
+  int remoteFd = rp_open(argv[3], O_RDONLY);  
   char buf[1024];
   int err;
 

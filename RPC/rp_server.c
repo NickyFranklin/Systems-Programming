@@ -197,7 +197,7 @@ void handle_open() {
   mode_t *mode;
   
   int fd;
-  
+
   pathname = read_from_client();
   flags = (int *) read_from_client();
   // Call the syscall with arguments
@@ -210,13 +210,16 @@ void handle_open() {
   else {
     fd = open(pathname, *flags);
   }
+  
   // Send the return of open to the client
   send_to_client(&fd, sizeof(int));
-  
-  // Send the errno information to the client
-  send_to_client(&errno, sizeof(errno));
 
+  // Send the errno information to the client
+  
+  send_to_client(&errno, sizeof(errno));
+  
   free(pathname);
+  
   free(flags);
 } 
 
@@ -251,19 +254,25 @@ void handle_read() {
   
   // Read in the argumets of sent by client 
   int *fd = (int *) read_from_client();
-  char *buf = read_from_client();
+  //char *buf = (char *) read_from_client();//malloc(10000);
+  //buf = read_from_client();
   size_t *count = (size_t *) read_from_client();
   int num;
-  
+  char *buf = malloc(*count);
   // Call the syscall with arguments
   num = read(*fd, buf, *count);
   
   send_to_client(&num, sizeof(int));
+  
+  send_to_client(buf, strlen(buf));
+  
   send_to_client(&errno, sizeof(int));
 
+  //write(2, "here\n", strlen("here\n"));
   free(fd);
   free(buf);
   free(count);
+  //write(2, "here\n", strlen("here\n"));
 } 
 
 
@@ -378,25 +387,28 @@ int main() {
 
     // Set socket to listen for connections
     //The backlog number can be set higher for more connections
-    listen(sock_fd, 1);
+    listen(sock_fd, 1024);
     
     /************************************/
     //         PART 2 OF PROJECT        //                                    
     /************************************/
         
         // Wait for client to connect
-        const int conn = 0;
-	int listener = 0;
-	
+        socklen_t s_len2 = sizeof(client_addr);
+	pid_t pid= getpid();
+	int conn;
+	while(pid > 0) {
+	  conn = accept(sock_fd, (struct sockaddr*) &client_addr, (socklen_t*) &s_len2);
+	  pid = fork();
+	}
         // Redirects stdin and stdout to the socket
         // These lines must be here to work with the send_to_client and read_from_client functions
         dup2(conn, 0);
         dup2(conn, 1);
         close(conn); 
 
-	socklen_t s_len2 = sizeof(client_addr);
-	listener = accept(sock_fd, (struct sockaddr*) &client_addr, (socklen_t*) &s_len2);
-	if(listener < 0) {
+	//socklen_t s_len2 = sizeof(client_addr);
+	if(conn < 0) {
 	  return -1;
 	}
 	// Read the type sent by the client
@@ -405,27 +417,32 @@ int main() {
         // Do the appropriate action for the type sent by calling the appropriate handler
 	while(string != NULL) {
 	  if(strcmp(string, "open") == 0) {
-	    write(2, "here\n", sizeof("here\n"));
+	    write(2, "open\n", sizeof("open\n"));
 	    handle_open();
 	  }
 	  
 	  else if(strcmp(string, "read") == 0) {
+	    write(2, "read\n", sizeof("read\n"));
 	    handle_read();
 	  }
 	  
 	  else if(strcmp(string, "write") == 0) {
+	    write(2, "write\n", sizeof("write\n"));
 	    handle_write();
 	  }
 	  
 	  else if(strcmp(string, "close") == 0) {
+	    write(2, "close\n", sizeof("close\n"));
 	    handle_close();
 	  }
 	  
 	  else if(strcmp(string, "lseek") == 0) {
+	    write(2, "lseek\n", sizeof("lseek\n"));
 	    handle_lseek();
 	  }
 	  
 	  else if(strcmp(string, "checksum") == 0) {
+	    write(2, "checksum\n", sizeof("checksum\n"));
 	    handle_checksum();
 	  }
 
@@ -433,7 +450,7 @@ int main() {
 	  string = read_from_client();
 	}
         // Wait for more commands (maybe a loop)
-	
+      
 	
         // Exit when EOF is sent to server (i.e. child has closed the connection)
 
